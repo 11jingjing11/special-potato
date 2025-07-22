@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国际课程大纲中心 - AP/A-Level/IB</title>
+    <style>
+        :root {
+            --primary: #4a6bdf;
+            --secondary: #6c757d;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            background: linear-gradient(135deg, var(--primary), #2c4bdd);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .search-container {
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        #search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        #search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(74, 107, 223, 0.3);
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            margin: 0 5px;
+            background: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .tab-btn:hover:not(.active) {
+            background: #e9ecef;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .syllabus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .syllabus-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .syllabus-card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+        }
+        .card-body {
+            padding: 15px;
+        }
+        .card-body p {
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        .view-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .view-btn:hover {
+            background: #3a5bd0;
+        }
+        .pdf-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            position: relative;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--secondary);
+            font-size: 14px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        /* 加载动画 */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* 空状态提示 */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary);
+            display: none;
+        }
+        /* 分享按钮 */
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .share-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .share-twitter {
+            background: #1DA1F2;
+        }
+        .share-facebook {
+            background: #4267B2;
+        }
+        @media (max-width: 768px) {
+            .syllabus-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab-btn {
+                padding: 10px 15px;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header role="banner" aria-label="网站标题区域">
+            <h1>国际课程大纲中心</h1>
+            <p>AP、A-Level、IB 课程官方教学大纲一站式查询</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="搜索课程名称 (如: AP微积分、IB数学、A-Level物理)..." aria-label="搜索课程大纲">
+        </div>
+
+        <div class="tabs" role="tablist">
+            <button class="tab-btn active" data-tab="ap" role="tab" aria-selected="true" aria-controls="ap">AP 课程</button>
+            <button class="tab-btn" data-tab="alevel" role="tab" aria-selected="false" aria-controls="alevel">A-Level 课程</button>
+            <button class="tab-btn" data-tab="ib" role="tab" aria-selected="false" aria-controls="ib">IB 课程</button>
+        </div>
+
+        <!-- AP 课程内容 -->
+        <div id="ap" class="tab-content active" role="tabpanel">
+            <div class="syllabus-grid">
+                <div class="syllabus-card">
+                    <div class="card-header">AP 微积分 AB</div>
+                    <div class="card-body">
+                        <p>College Board 官方课程大纲，包含考试内容和评分标准。</p>
+                        <p><strong>版本:</strong> 2023-2024</p>
+                        <a href="#" class="view-btn" data-pdf="https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-course-and-exam-description.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="AP 微积分 AB 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="AP 微积分 AB 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">AP 物理 1</div>
+                    <div class="card-body">
+                        <p>代数基础的大学物理课程，涵盖力学、波和电学。</p>
+                        <p><strong>版本:</strong> 2023-2024</p>
+                        <a href="#" class="view-btn" data-pdf="https://apcentral.collegeboard.org/media/pdf/ap-physics-1-course-and-exam-description.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="AP 物理 1 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="AP 物理 1 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">AP 化学</div>
+                    <div class="card-body">
+                        <p>涵盖原子结构、化学反应、热力学等核心化学概念。</p>
+                        <p><strong>版本:</strong> 2023-2024</p>
+                        <a href="#" class="view-btn" data-pdf="https://apcentral.collegeboard.org/media/pdf/ap-chemistry-course-and-exam-description.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="AP 化学 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="AP 化学 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">AP 生物</div>
+                    <div class="card-body">
+                        <p>探索生物学的核心原理、概念和科学实践。</p>
+                        <p><strong>版本:</strong> 2023-2024</p>
+                        <a href="#" class="view-btn" data-pdf="https://apcentral.collegeboard.org/media/pdf/ap-biology-course-and-exam-description.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="AP 生物 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="AP 生物 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="empty-state" id="ap-empty">没有找到匹配的AP课程</div>
+        </div>
+
+        <!-- A-Level 课程内容 -->
+        <div id="alevel" class="tab-content" role="tabpanel">
+            <div class="syllabus-grid">
+                <div class="syllabus-card">
+                    <div class="card-header">A-Level 数学 (CAIE)</div>
+                    <div class="card-body">
+                        <p>剑桥国际 A-Level 数学课程大纲 (9709)。</p>
+                        <p><strong>版本:</strong> 2020-2022</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.cambridgeinternational.org/Images/414437-2020-2022-syllabus.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="A-Level 数学 (CAIE) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="A-Level 数学 (CAIE) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">A-Level 物理 (Edexcel)</div>
+                    <div class="card-body">
+                        <p>爱德思 A-Level 物理课程大纲 (9PH0)。</p>
+                        <p><strong>版本:</strong> 2015</p>
+                        <a href="#" class="view-btn" data-pdf="https://qualifications.pearson.com/content/dam/pdf/A%20Level/Physics/2015/Specification%20and%20sample%20assessments/9781446912155_GCE_2015_A_Level_Physics_Spec.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="A-Level 物理 (Edexcel) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="A-Level 物理 (Edexcel) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">A-Level 化学 (AQA)</div>
+                    <div class="card-body">
+                        <p>AQA A-Level 化学课程大纲 (7405)。</p>
+                        <p><strong>版本:</strong> 2015</p>
+                        <a href="#" class="view-btn" data-pdf="https://filestore.aqa.org.uk/resources/chemistry/specifications/AQA-7404-7405-SP-2015.PDF">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="A-Level 化学 (AQA) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="A-Level 化学 (AQA) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">A-Level 经济学 (CAIE)</div>
+                    <div class="card-body">
+                        <p>剑桥国际 A-Level 经济学课程大纲 (9708)。</p>
+                        <p><strong>版本:</strong> 2020-2022</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.cambridgeinternational.org/Images/414476-2020-2022-syllabus.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="A-Level 经济学 (CAIE) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="A-Level 经济学 (CAIE) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="empty-state" id="alevel-empty">没有找到匹配的A-Level课程</div>
+        </div>
+
+        <!-- IB 课程内容 -->
+        <div id="ib" class="tab-content" role="tabpanel">
+            <div class="syllabus-grid">
+                <div class="syllabus-card">
+                    <div class="card-header">IB 数学分析与方法 (AA HL)</div>
+                    <div class="card-body">
+                        <p>IB 数学分析与方法高级课程大纲 (2021年首次评估)。</p>
+                        <p><strong>版本:</strong> 2021</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.ibo.org/globalassets/new-structure/programmes/dp/mathematics/dp-maths-aa-2021-en.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="IB 数学分析与方法 (AA HL) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="IB 数学分析与方法 (AA HL) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">IB 物理 (HL)</div>
+                    <div class="card-body">
+                        <p>IB 物理高级课程大纲 (2023年首次评估)。</p>
+                        <p><strong>版本:</strong> 2023</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.ibo.org/globalassets/new-structure/programmes/dp/student-education/2021/dp-physics-2021-en.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="IB 物理 (HL) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="IB 物理 (HL) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">IB 化学 (SL)</div>
+                    <div class="card-body">
+                        <p>IB 化学标准课程大纲 (2023年首次评估)。</p>
+                        <p><strong>版本:</strong> 2023</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.ibo.org/globalassets/new-structure/programmes/dp/student-education/2021/dp-chemistry-2021-en.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="IB 化学 (SL) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="IB 化学 (SL) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="syllabus-card">
+                    <div class="card-header">IB 经济学 (HL)</div>
+                    <div class="card-body">
+                        <p>IB 经济学高级课程大纲 (2022年首次评估)。</p>
+                        <p><strong>版本:</strong> 2022</p>
+                        <a href="#" class="view-btn" data-pdf="https://www.ibo.org/globalassets/new-structure/programmes/dp/student-education/2020/dp-economics-2020-en.pdf">查看大纲</a>
+                        <div class="share-buttons">
+                            <a href="#" class="share-btn share-twitter" data-share="IB 经济学 (HL) 课程大纲">Twitter</a>
+                            <a href="#" class="share-btn share-facebook" data-share="IB 经济学 (HL) 课程大纲">Facebook</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="empty-state" id="ib-empty">没有找到匹配的IB课程</div>
+        </div>
+
+        <!-- PDF 查看器 -->
+        <div id="pdf-viewer-container" class="pdf-container">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>正在加载PDF文档...</p>
+            </div>
+            <iframe id="pdf-viewer" width="100%" height="100%" frameborder="0" title="PDF文档查看器"></iframe>
+            <a href="#" class="back-btn" id="back-btn">← 返回课程列表</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 国际课程大纲中心 | 资料来源于各考试局官方网站</p>
+        <p>免责声明：本网站仅提供资料索引，所有版权归原考试机构所有</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从本地存储获取上次活动的选项卡
+            const lastActiveTab = localStorage.getItem('lastActiveTab') || 'ap';
+            
+            // 初始化选项卡
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // 设置上次活动的选项卡为当前活动状态
+            document.querySelector(`.tab-btn[data-tab="${lastActiveTab}"]`).classList.add('active');
+            document.querySelector(`.tab-content#${lastActiveTab}`).classList.add('active');
+            
+            // 移除其他选项卡的active类
+            tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') !== lastActiveTab) {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                } else {
+                    btn.setAttribute('aria-selected', 'true');
+                }
+            });
+            
+            tabContents.forEach(content => {
+                if (content.id !== lastActiveTab) {
+                    content.classList.remove('active');
+                }
+            });
+
+            // 选项卡切换功能 - 使用事件委托
+            document.querySelector('.tabs').addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-btn')) {
+                    // 移除所有active类
+                    tabBtns.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.setAttribute('aria-selected', 'false');
+                    });
+                    
+                    // 添加active类到当前选项卡
+                    e.target.classList.add('active');
+                    e.target.setAttribute('aria-selected', 'true');
+                    const tabId = e.target.getAttribute('data-tab');
+                    
+                    // 保存到本地存储
+                    localStorage.setItem('lastActiveTab', tabId);
+                    
+                    // 显示对应内容
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                    
+                    // 触发搜索以更新显示
+                    triggerSearch();
+                }
+            });
+
+            // PDF查看功能
+            const pdfContainer = document.getElementById('pdf-viewer-container');
+            const pdfViewer = document.getElementById('pdf-viewer');
+            const backBtn = document.getElementById('back-btn');
+            const loadingSpinner = document.querySelector('.loading-spinner');
+            
+            // 使用事件委托处理查看按钮点击
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('view-btn')) {
+                    e.preventDefault();
+                    const pdfUrl = e.target.getAttribute('data-pdf');
+                    
+                    // 验证PDF URL
+                    if (!isValidPdfUrl(pdfUrl)) {
+                        alert('无效的PDF链接，请确保链接来自官方来源');
+                        return;
+                    }
+                    
+                    // 显示加载指示器
+                    loadingSpinner.style.display = 'flex';
+                    pdfViewer.style.display = 'none';
+                    
+                    // 显示PDF查看器
+                    pdfContainer.style.display = 'block';
+                    
+                    // 设置PDF源
+                    pdfViewer.src = pdfUrl;
+                    
+                    // 滚动到查看器
+                    pdfContainer.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // 隐藏课程列表
+                    document.querySelector('.tab-content.active').style.display = 'none';
+                }
+                
+                // 处理分享按钮点击
+                if (e.target.classList.contains('share-btn')) {
+                    e.preventDefault();
+                    const title = e.target.getAttribute('data-share');
+                    const url = window.location.href.split('#')[0];
+                    const text = `查看 ${title} 在国际课程大纲中心`;
+                    
+                    if (e.target.classList.contains('share-twitter')) {
+                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+                    } else if (e.target.classList.contains('share-facebook')) {
+                        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                    }
+                }
+            });
+            
+            // PDF加载完成事件
+            pdfViewer.addEventListener('load', function() {
+                loadingSpinner.style.display = 'none';
+                pdfViewer.style.display = 'block';
+            });
+            
+            // 返回按钮事件
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                pdfContainer.style.display = 'none';
+                document.querySelector('.tab-content.active').style.display = 'block';
+                pdfViewer.src = '';
+            });
+
+            // 搜索功能
+            const searchInput = document.getElementById('search-input');
+            
+            searchInput.addEventListener('input', function() {
+                triggerSearch();
+            });
+            
+            function triggerSearch() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const activeTab = document.querySelector('.tab-content.active');
+                const cards = activeTab.querySelectorAll('.syllabus-card');
+                const emptyState = activeTab.querySelector('.empty-state');
+                
+                let visibleCount = 0;
+                
+                cards.forEach(card => {
+                    const title = card.querySelector('.card-header').textContent.toLowerCase();
+                    const description = card.querySelector('.card-body p').textContent.toLowerCase();
+                    const version = card.querySelector('.card-body p:nth-of-type(2)')?.textContent.toLowerCase() || '';
+                    
+                    if (searchTerm === '' || 
+                        title.includes(searchTerm) || 
+                        description.includes(searchTerm) ||
+                        version.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // 显示/隐藏空状态提示
+                if (visibleCount === 0 && searchTerm !== '') {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+            
+            // 验证PDF URL是否来自可信来源
+            function isValidPdfUrl(url) {
+                const allowedDomains = [
+                    'apcentral.collegeboard.org',
+                    'www.cambridgeinternational.org',
+                    'qualifications.pearson.com',
+                    'filestore.aqa.org.uk',
+                    'www.ibo.org'
+                ];
+                
+                try {
+                    const domain = new URL(url).hostname;
+                    return url.endsWith('.pdf') && allowedDomains.some(d => domain.endsWith(d));
+                } catch {
+                    return false;
+                }
+            }
+            
+            // 预加载第一个PDF
+            const firstPdfUrl = document.querySelector('.view-btn').getAttribute('data-pdf');
+            if (isValidPdfUrl(firstPdfUrl)) {
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.href = firstPdfUrl;
+                link.as = 'document';
+                link.crossOrigin = 'anonymous';
+                document.head.appendChild(link);
+            }
+        });
+    </script>
+</body>
+</html>
